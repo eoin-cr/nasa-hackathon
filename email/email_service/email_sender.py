@@ -1,25 +1,51 @@
 from flask import Flask, request
-import smtplib
+from azure.communication.email import EmailClient
+
+from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
 
 # Configuration from environment variables
+load_dotenv()
+
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 
 
 def send_email(subject, body):
-    with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-        smtp.starttls()
-        smtp.login(EMAIL_USER, EMAIL_PASSWORD)
-        message = f"Subject: {subject}\n\n{body}"
-        smtp.sendmail(EMAIL_USER, EMAIL_RECEIVER, message)
+    try:
+        print("trying to send message")
+        connection_string = EMAIL_PASSWORD
+        client = EmailClient.from_connection_string(connection_string)
+
+        message = {
+            "senderAddress": EMAIL_USER,
+            "recipients": {"to": [{"address": EMAIL_RECEIVER}]},
+            "content": {
+                "subject": subject,
+                "plainText": body,
+                "html": """
+				<html>
+					<body>
+						<h1>Hello world via email.</h1>
+					</body>
+				</html>""",
+            },
+        }
+
+        poller = client.begin_send(message)
+        result = poller.result()
+        print("Message sent: ", result.message_id)
+
+    except Exception as ex:
+        print(ex)
 
 
 @app.route("/send_abnormal_email", methods=["POST"])
 def send_abnormal_email():
+    print("Sending abnormal email")
     data = request.json
     subject = data["subject"]
     download_link = data["download_link"]

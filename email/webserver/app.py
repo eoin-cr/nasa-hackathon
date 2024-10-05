@@ -20,14 +20,14 @@ def upload_data():
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
 
-    # Load the CSV file and check max amplitude
+    # Load the CSV file and check max velocity
     df = pd.read_csv(file_path)
-    max_amplitude = df["amplitude"].max()
+    max_velocity = df["velocity(m/s)"].max()
 
-    if max_amplitude > THRESHOLD_VALUE:
+    if max_velocity > THRESHOLD_VALUE:
         # Trigger abnormal quake email
         email_service_url = "http://email_service:5001/send_abnormal_email"
-        subject = f"Abnormal quake with max amplitude {max_amplitude:.2e}x bigger than median detected"
+        subject = f"Abnormal quake with max velocity {max_velocity:.2e}x bigger than median detected"
     else:
         # Trigger normal quake email
         email_service_url = "http://email_service:5001/send_normal_email"

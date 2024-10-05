@@ -10,6 +10,7 @@ def process_file(file_path):
     filename = os.path.basename(file_path)
     with open(file_path, "rb") as f:
         files = {"file": (filename, f)}
+        print("About to post")
         response = requests.post(FLASK_SERVER_URL, files=files)
 
     if response.status_code == 200:
