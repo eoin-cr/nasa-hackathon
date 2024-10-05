@@ -14,7 +14,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 
 
-def send_email(subject, body):
+def send_email(subject, body, html_body):
     try:
         print("trying to send message")
         connection_string = EMAIL_PASSWORD
@@ -29,7 +29,9 @@ def send_email(subject, body):
                 "html": """
 				<html>
 					<body>
-						<h1>Hello world via email.</h1>
+						"""
+                + html_body
+                + """
 					</body>
 				</html>""",
             },
@@ -50,7 +52,8 @@ def send_abnormal_email():
     subject = data["subject"]
     download_link = data["download_link"]
     body = f"An abnormal quake was detected. Download the data here: {download_link}"
-    send_email(subject, body)
+    html_body = f"A new quake was detected. Download the data here: <a href={download_link}>{download_link}</a>"
+    send_email(subject, body, html_body)
     return {"message": "Abnormal quake email sent"}, 200
 
 
@@ -60,7 +63,8 @@ def send_normal_email():
     subject = data["subject"]
     download_link = data["download_link"]
     body = f"A new quake was detected. Download the data here: {download_link}"
-    send_email(subject, body)
+    html_body = f"A new quake was detected. Download the data here: <a href={download_link}>{download_link}</a>"
+    send_email(subject, body, html_body)
     return {"message": "Normal quake email sent"}, 200
 
 
