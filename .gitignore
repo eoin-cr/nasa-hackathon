@@ -2,3 +2,7 @@
 /env/
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+/__pycache__/
+binaryclass_lunar.keras
+processed_data/
+space_apps_2024_seismic_detection.zip
