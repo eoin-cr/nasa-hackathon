@@ -8,6 +8,8 @@ services:
     depends_on:
       email_service:
         condition: service_started
+    dns:
+      - 8.8.8.8
 
   email_service:
     build: ./email_service

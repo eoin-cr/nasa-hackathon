@@ -52,7 +52,7 @@ def send_abnormal_email():
     subject = data["subject"]
     download_link = data["download_link"]
     body = f"An abnormal quake was detected. Download the data here: {download_link}"
-    html_body = f"A new quake was detected. Download the data here: <a href={download_link}>{download_link}</a>"
+    html_body = f"An abnormal quake was detected. Download the data here: <a href={download_link}>{download_link}</a>"
     send_email(subject, body, html_body)
     return {"message": "Abnormal quake email sent"}, 200
 

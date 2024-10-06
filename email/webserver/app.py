@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = "./data"
 THRESHOLD_MULTIPLIER = 2.5
-THRESHOLD_VALUE = 5.473234895023897e-09 * THRESHOLD_MULTIPLIER
+MEDIAN_VALUE = 5.473234895023897e-09
+THRESHOLD_VALUE = MEDIAN_VALUE * THRESHOLD_MULTIPLIER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -23,11 +24,13 @@ def upload_data():
     # Load the CSV file and check max velocity
     df = pd.read_csv(file_path)
     max_velocity = df["velocity(m/s)"].max()
+    min_velocity = df["velocity(m/s)"].min()
 
-    if max_velocity > THRESHOLD_VALUE:
+    max_abs_vel = max(abs(max_velocity), abs(min_velocity))
+    if max_abs_vel > THRESHOLD_VALUE:
         # Trigger abnormal quake email
         email_service_url = "http://email_service:5001/send_abnormal_email"
-        subject = f"Abnormal quake with max velocity {max_velocity:.2e}x bigger than median detected"
+        subject = f"Abnormal quake with max velocity {max_abs_vel/MEDIAN_VALUE:.2f}x bigger than median detected"
     else:
         # Trigger normal quake email
         email_service_url = "http://email_service:5001/send_normal_email"
