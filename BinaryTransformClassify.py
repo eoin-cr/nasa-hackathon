@@ -7,13 +7,21 @@ class BinaryTransformClassifier:
     def __init__(self, input_shape):
         input_layer = keras.layers.Input(input_shape)
 
-        conv1 = keras.layers.Conv2D(filters=64, kernel_size=3, padding="same")(input_layer)
-        conv1 = keras.layers.BatchNormalization()(conv1)
-        conv1 = keras.layers.ReLU()(conv1)
-        
-        gap = keras.layers.GlobalAveragePooling2D()(conv1)
+        conv1 = keras.layers.Conv2D(filters=1024, kernel_size=3, padding="same")(input_layer)
+        batched1 = keras.layers.BatchNormalization()(conv1)
+        relued1 = keras.layers.ReLU()(batched1)
 
-        output_layer = keras.layers.Dense(2, activation="softmax")(gap)
+        conv2 = keras.layers.Conv2D(filters=512, kernel_size=3, padding="same")(relued1)
+        batched2 = keras.layers.BatchNormalization()(conv2)
+        relued2 = keras.layers.ReLU()(batched2)
+
+        conv3 = keras.layers.Conv2D(filters=64, kernel_size=3, padding="same")(relued2)
+        batched3 = keras.layers.BatchNormalization()(conv3)
+        relued3 = keras.layers.ReLU()(batched3)
+        
+        gap = keras.layers.GlobalAveragePooling2D()(relued3)
+
+        output_layer = keras.layers.Dense(1, activation="sigmoid")(gap)
 
         self.model = keras.models.Model(inputs=input_layer, outputs=output_layer)
 
@@ -26,16 +34,14 @@ class BinaryTransformClassifier:
             keras.callbacks.ModelCheckpoint(
                 "binaryclass_lunar.keras", save_best_only=True, monitor="val_loss"
             ),
-            keras.callbacks.ReduceLROnPlateau(
-                monitor="val_loss", factor=0.5, patience=20, min_lr=0.005
-            ),
-            keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, verbose=1),
         ]
 
         self.model.compile(
-            optimizer="adam",
-            loss="sparse_categorical_crossentropy",
-            metrics=["sparse_categorical_accuracy"],
+         loss=keras.losses.BinaryCrossentropy(),
+    metrics=[
+        keras.metrics.BinaryAccuracy(),
+        keras.metrics.FalseNegatives(),
+    ],   optimizer=keras.optimizers.Adam(learning_rate=0.01),
         )
 
         return self.model.fit(
