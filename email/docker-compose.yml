@@ -1,0 +1,27 @@
+services:
+  webserver:
+    build: ./webserver
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./webserver/data:/app/data
+    depends_on:
+      email_service:
+        condition: service_started
+    dns:
+      - 8.8.8.8
+
+  email_service:
+    build: ./email_service
+    env_file: .env
+    ports:
+      - "5001:5001"
+
+  data_watcher:
+    build: ./data_watcher
+    volumes:
+      - ./data_watcher/watched_dir:/watched_dir
+    depends_on:
+      webserver:
+        condition: service_started
+    restart: always
